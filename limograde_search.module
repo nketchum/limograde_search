@@ -1,0 +1,42 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ViewExecutable;
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function limograde_search_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
+  // if ($form['#id'] == 'my-views-exposed-form-id') {
+    $query = db_select('node__field_location', 'loc');
+    $query->addField('loc', 'field_location_locality', 'city');
+    $query->addField('loc', 'field_location_administrative_area', 'state');
+    $query->condition('loc.bundle', 'company', '=');
+    $query->condition('loc.field_location_country_code', 'US', '=');
+    $query->distinct(TRUE);
+    $query->orderby('loc.field_location_locality', 'ASC');
+    foreach ($query->execute() as $row) {
+      // print_r($row->city);
+      // print_r($row->state);
+    }
+  // }
+}
+
+// Ensure unique company nodes.
+function limograde_search_views_pre_render(ViewExecutable $view) {
+  if ($view->storage->get('id') === 'companies') {
+    $i = 0;
+    $nodes = [];
+    foreach ($view->result as $result) {
+      $entity = $result->_entity;
+      $nid = $entity->get('nid')->value;
+      if (in_array($nid, $nodes)) {
+        unset($view->result[$i]);
+      } else {
+        $nodes[] = $entity->get('nid')->value;
+      }
+      $i++;
+    }
+  }
+}
