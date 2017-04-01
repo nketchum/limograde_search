@@ -3,12 +3,28 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 
-
 /**
  * Implements hook_form_FORM_ID_alter().
  */
 function limograde_search_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
-  // if ($form['#id'] == 'my-views-exposed-form-id') {
+  if ($form['#id'] == 'views-exposed-form-companies-page-1') {
+    // Submit
+    $form['actions']['submit']['#value'] = t('Search');
+    // Type
+    unset($form['#info']['filter-field_vehicle_type_value']['label']);
+    $form['type']['#options']['All'] = t('Choose a type...');
+    // State
+    unset($form['state']['#title']);
+    unset($form['#info']['filter-state']['label']);
+    $form['state']['#options']['All'] = t('Choose a state...');
+    // City
+    unset($form['#info']['filter-field_location_locality']['label']);
+    $form['City']['#type'] = 'select';
+    $form['City']['#size']= NULL;
+    $form['City']['#options'][''] = t('Choose a city...');
+    $form['City']['#prefix'] = '<div class="limograde-search-city">';
+    $form['City']['#suffix'] = '</div>';
+    // Get list of all cities.
     $query = db_select('node__field_location', 'loc');
     $query->addField('loc', 'field_location_locality', 'city');
     $query->addField('loc', 'field_location_administrative_area', 'state');
@@ -16,15 +32,30 @@ function limograde_search_form_views_exposed_form_alter(&$form, FormStateInterfa
     $query->condition('loc.field_location_country_code', 'US', '=');
     $query->distinct(TRUE);
     $query->orderby('loc.field_location_locality', 'ASC');
+    // Organize by state.
+    $states = [];
     foreach ($query->execute() as $row) {
-      // print_r($row->city);
-      // print_r($row->state);
+      $states[$row->state][ucwords($row->city)] = ucwords($row->city);
     }
-  // }
+    // Create master cities, and states' cities dropdowns.
+    foreach ($states as $state => $cities) {
+      $form[$state]['#type'] = 'select';
+      $form[$state]['#options'] = array('' => 'Choose a city...');
+      $form[$state]['#prefix'] = '<div class="limograde-search-city default-hide">';
+      $form[$state]['#suffix'] = '</div>';
+      foreach ($cities as $city) {
+        $form['City']['#options'][$city] = t($city);
+        $form[$state]['#options'][$city] = t($city);
+      }
+    }
+  }
 }
 
-// Ensure unique company nodes.
+/**
+ * Implements hook_views_pre_render().
+ */
 function limograde_search_views_pre_render(ViewExecutable $view) {
+  // Ensure unique company nodes.
   if ($view->storage->get('id') === 'companies') {
     $i = 0;
     $nodes = [];
