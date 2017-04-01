@@ -1,5 +1,5 @@
 limograde_search.add_company:
-  route_name: node.add_page
+  route_name: node.add
   route_parameters:
     node_type: 'company'
   title: 'Add company'
