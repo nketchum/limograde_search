@@ -9,19 +9,19 @@ use Drupal\views\ViewExecutable;
 function limograde_search_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
   if ($form['#id'] == 'views-exposed-form-companies-page-1') {
     // Submit
-    $form['actions']['submit']['#value'] = t('Search');
+    $form['actions']['submit']['#value'] = t('New search');
     // Type
     unset($form['#info']['filter-field_vehicle_type_value']['label']);
-    $form['type']['#options']['All'] = t('Choose a type...');
+    $form['type']['#options']['All'] = t('All vehicles');
     // State
     unset($form['state']['#title']);
     unset($form['#info']['filter-state']['label']);
-    $form['state']['#options']['All'] = t('Choose a state...');
+    $form['state']['#options']['All'] = t('All states');
     // City
     unset($form['#info']['filter-field_location_locality']['label']);
     $form['City']['#type'] = 'select';
     $form['City']['#size']= NULL;
-    $form['City']['#options'][''] = t('Choose a city...');
+    $form['City']['#options'][''] = t('All cities');
     $form['City']['#prefix'] = '<div class="limograde-search-city">';
     $form['City']['#suffix'] = '</div>';
     // Get list of all cities.
@@ -40,7 +40,7 @@ function limograde_search_form_views_exposed_form_alter(&$form, FormStateInterfa
     // Create master cities, and states' cities dropdowns.
     foreach ($states as $state => $cities) {
       $form[$state]['#type'] = 'select';
-      $form[$state]['#options'] = array('' => 'Choose a city...');
+      $form[$state]['#options'] = array('' => 'All cities');
       $form[$state]['#prefix'] = '<div class="limograde-search-city default-hide">';
       $form[$state]['#suffix'] = '</div>';
       foreach ($cities as $city) {
