@@ -4,4 +4,6 @@ description: Provides custom search extentions for LimoGrade.
 core: 8.x
 package: Custom
 dependencies:
+  - limograde_company
+  - limograde_vehicle
   - views
